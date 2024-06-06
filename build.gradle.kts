@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "2.0.0"
     application
+    idea
 }
 
 group = project.property("group") as String
@@ -26,4 +27,12 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+// IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
+idea {
+    module {
+        isDownloadSources = true
+        isDownloadJavadoc = true
+    }
 }
