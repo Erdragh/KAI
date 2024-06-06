@@ -13,14 +13,16 @@ import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.learning.config.Sgd
 import org.nd4j.linalg.lossfunctions.LossFunctions
 import org.slf4j.LoggerFactory
+import java.io.File
+import java.io.IOException
 
 private val LOGGER = LoggerFactory.getLogger("KAI")
 
 fun main() {
     LOGGER.info("Starting KAI")
 
-    val seed: Long = 1234
-    val nEpochs = 10000
+    val modelFile = File("model.zip")
+    var net: MultiLayerNetwork
 
     LOGGER.info("Preparing Data...")
 
@@ -61,39 +63,50 @@ fun main() {
 
     val ds = DataSet(input, labels)
 
-    LOGGER.info("Network configuration and training..")
+    try {
+        net = MultiLayerNetwork.load(modelFile, true)
+    } catch (e: IOException) {
+        LOGGER.error("Failed to load model from disk")
 
-    val conf = NeuralNetConfiguration.Builder()
-        .updater(Sgd(0.1))
-        .seed(seed)
-        .biasInit(0.0)
-        .miniBatch(false)
-        .list()
-        .layer(DenseLayer.Builder()
-            .nIn(2)
-            .nOut(4)
-            .activation(Activation.SIGMOID)
-            .weightInit(UniformDistribution(0.0, 1.0))
+        val seed: Long = 1234
+        val nEpochs = 10000
+
+        LOGGER.info("Network configuration and training..")
+
+        val conf = NeuralNetConfiguration.Builder()
+            .updater(Sgd(0.1))
+            .seed(seed)
+            .biasInit(0.0)
+            .miniBatch(false)
+            .list()
+            .layer(DenseLayer.Builder()
+                .nIn(2)
+                .nOut(4)
+                .activation(Activation.SIGMOID)
+                .weightInit(UniformDistribution(0.0, 1.0))
+                .build()
+            )
+            .layer(OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+                .nOut(2)
+                .activation(Activation.SOFTMAX)
+                .weightInit(UniformDistribution(0.0, 1.0))
+                .build()
+            )
             .build()
-        )
-        .layer(OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-            .nOut(2)
-            .activation(Activation.SOFTMAX)
-            .weightInit(UniformDistribution(0.0, 1.0))
-            .build()
-        )
-        .build()
 
-    val net = MultiLayerNetwork(conf)
-    net.init()
+        net = MultiLayerNetwork(conf)
+        net.init()
 
-    net.setListeners(ScoreIterationListener(100))
+        net.setListeners(ScoreIterationListener(100))
 
-    LOGGER.info(net.summary())
+        LOGGER.info(net.summary())
 
-    // actual learning
-    for (i in 0..<nEpochs) {
-        net.fit(ds)
+        // actual learning
+        for (i in 0..<nEpochs) {
+            net.fit(ds)
+        }
+
+        net.save(File("model.zip"), true)
     }
 
     val output = net.output(ds.features)
