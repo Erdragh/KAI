@@ -12,6 +12,7 @@ build/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+.kotlin
 
 ### Eclipse ###
 .apt_generated
@@ -40,3 +41,4 @@ bin/
 
 ### KAI
 model.zip
+run

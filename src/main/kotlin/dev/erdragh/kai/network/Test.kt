@@ -1,5 +1,7 @@
-package dev.erdragh.kai
+package dev.erdragh.kai.network
 
+import dev.erdragh.kai.KAIMod
+import dev.erdragh.kai.KAIMod.LOGGER
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration
 import org.deeplearning4j.nn.conf.distribution.UniformDistribution
 import org.deeplearning4j.nn.conf.layers.DenseLayer
@@ -12,13 +14,14 @@ import org.nd4j.linalg.dataset.DataSet
 import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.learning.config.Sgd
 import org.nd4j.linalg.lossfunctions.LossFunctions
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 
-private val LOGGER = LoggerFactory.getLogger("KAI")
+fun testXOR() {
+    xor()
+}
 
-fun main() {
+private fun xor() {
     LOGGER.info("Starting KAI")
 
     val modelFile = File("model.zip")
@@ -66,7 +69,7 @@ fun main() {
     try {
         net = MultiLayerNetwork.load(modelFile, true)
     } catch (e: IOException) {
-        LOGGER.error("Failed to load model from disk")
+        KAIMod.LOGGER.error("Failed to load model from disk")
 
         val seed: Long = 1234
         val nEpochs = 10000
@@ -79,14 +82,16 @@ fun main() {
             .biasInit(0.0)
             .miniBatch(false)
             .list()
-            .layer(DenseLayer.Builder()
+            .layer(
+                DenseLayer.Builder()
                 .nIn(2)
                 .nOut(4)
                 .activation(Activation.SIGMOID)
                 .weightInit(UniformDistribution(0.0, 1.0))
                 .build()
             )
-            .layer(OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+            .layer(
+                OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
                 .nOut(2)
                 .activation(Activation.SOFTMAX)
                 .weightInit(UniformDistribution(0.0, 1.0))
@@ -108,6 +113,10 @@ fun main() {
 
         net.save(File("model.zip"), true)
     }
+
+    val x = net.output(Nd4j.zeros(1, 2))
+    LOGGER.info(x.toString())
+
 
     val output = net.output(ds.features)
     LOGGER.info(output.toString())
