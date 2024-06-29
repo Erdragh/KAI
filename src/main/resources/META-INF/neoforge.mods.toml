@@ -1,27 +1,27 @@
 modLoader = "kotlinforforge"
-loaderVersion = "${kotlinForgeRange}"
-license = "${license}"
+loaderVersion = "[5.3,)"
+license = "MIT"
 issueTrackerURL = "https://github.com/Erdragh/KAI/issues"
 
 [[mods]]
-modId = "${mod_id}"
-version = "${version}"
-displayName = "${mod_name}"
+modId = "kai"
+version = "1"
+displayName = "KAI"
 displayURL = "https://modrinth.com/mod/kai"
 logoFile = "icon.png"
-authors = "${mod_author}"
+authors = "Erdragh"
 description = "${description}"
 
-[[dependencies.${mod_id}]]
+[[dependencies.kai]]
 modId = "neoforge"
 type = "required"
-versionRange = "${neoVersionRange}"
+versionRange = "[21,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.kai]]
 modId = "minecraft"
 type = "required"
-versionRange = "${minecraftVersionRange}"
+versionRange = "[1.21,)"
 ordering = "NONE"
 side = "BOTH"

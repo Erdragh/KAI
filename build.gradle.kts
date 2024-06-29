@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "2.0.0"
     idea
     // Apply the plugin. You can find the latest version at https://github.com/neoforged/ModDevGradle/packages/2159800.
-    id("net.neoforged.moddev") version "0.1.74"
+    id("net.neoforged.moddev") version "0.1.116"
 }
 
 group = project.property("group") as String
@@ -19,14 +19,26 @@ repositories {
     }
 }
 
+val moduleFixesForDL4J = listOf("slf4j", "commons", "guava", "jackson", "lombok", "oshi.core", "protobuf", "fastutil", "resources", "gson", "commons_codec", "fx_graphics")
+
+sourceSets {
+    moduleFixesForDL4J.forEach {
+        create("fix_$it") {
+            java {}
+        }
+    }
+}
+
 val neoVersion: String by project
 
-val nonModImpl by configurations.creating {
-    isTransitive = true
-}
+val nonModImpl: Configuration by configurations.creating
 configurations.implementation.extendsFrom(configurations.named(nonModImpl.name))
 
 neoForge {
+    moduleFixesForDL4J.forEach {
+        addModdingDependenciesTo(sourceSets.named("fix_$it").get())
+    }
+
     // We currently only support NeoForge versions later than 21.0.x
     version = neoVersion
 
@@ -60,15 +72,32 @@ val kotlinForgeVersion: String by project
 
 dependencies {
     // Neural Network stuff
-    nonModImpl("org.deeplearning4j:deeplearning4j-core:$dl4jVersion")
-    nonModImpl("org.nd4j:nd4j-native-platform:$dl4jVersion")
+    nonModImpl("org.deeplearning4j:deeplearning4j-core:$dl4jVersion") {
+        exclude(module = "org.slf4j")
+        exclude(module = "slf4j-api")
+        exclude(group = "slf4j")
+        exclude(group = "org.slf4j")
+        exclude(module = "commons.io")
+        exclude(module = "guava")
+    }
+    nonModImpl("org.nd4j:nd4j-native-platform:$dl4jVersion") {
+        exclude(module = "org.slf4j")
+        exclude(module = "slf4j-api")
+        exclude(group = "slf4j")
+        exclude(group = "org.slf4j")
+        exclude(module = "commons.io")
+        exclude(module = "guava")
+    }
+    moduleFixesForDL4J.forEach {
+        nonModImpl(sourceSets.named("fix_$it").get().output)
+    }
 
     // Kotlin stuff
     implementation("thedarkcolour:kotlinforforge-neoforge:$kotlinForgeVersion")
 }
 
 tasks {
-    processResources {
+    withType<ProcessResources>().configureEach {
         @Suppress("UNCHECKED_CAST")
         val loadedProperties = Properties().apply {
             load(project.rootProject.file("gradle.properties").inputStream())
@@ -76,7 +105,7 @@ tasks {
 
         inputs.properties(loadedProperties)
 
-        filesMatching(listOf("META-INF/neoforge.mods.toml", "*.mixins.json")) {
+        filesMatching(listOf("**/*.mods.toml", "**/*.mixins.json")) {
             expand(loadedProperties)
         }
     }
