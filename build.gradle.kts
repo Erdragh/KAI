@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "2.0.0"
     idea
     // https://projects.neoforged.net/neoforged/moddevgradle
-    id("net.neoforged.moddev") version "0.1.117"
+    id("net.neoforged.moddev") version "0.1.122"
 }
 
 tasks.named<Wrapper>("wrapper") {
