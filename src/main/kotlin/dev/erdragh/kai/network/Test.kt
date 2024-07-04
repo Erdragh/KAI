@@ -1,7 +1,5 @@
 package dev.erdragh.kai.network
 
-import dev.erdragh.kai.KAIMod
-import dev.erdragh.kai.KAIMod.LOGGER
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration
 import org.deeplearning4j.nn.conf.distribution.UniformDistribution
 import org.deeplearning4j.nn.conf.layers.DenseLayer
@@ -14,8 +12,16 @@ import org.nd4j.linalg.dataset.DataSet
 import org.nd4j.linalg.factory.Nd4j
 import org.nd4j.linalg.learning.config.Sgd
 import org.nd4j.linalg.lossfunctions.LossFunctions
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
+
+private val LOGGER = LoggerFactory.getLogger("KAI")
+
+fun main(args: Array<String>) {
+    LOGGER.info("Hello")
+    testXOR()
+}
 
 fun testXOR() {
     xor()
@@ -69,7 +75,7 @@ private fun xor() {
     try {
         net = MultiLayerNetwork.load(modelFile, true)
     } catch (e: IOException) {
-        KAIMod.LOGGER.error("Failed to load model from disk")
+        LOGGER.error("Failed to load model from disk")
 
         val seed: Long = 1234
         val nEpochs = 10000
