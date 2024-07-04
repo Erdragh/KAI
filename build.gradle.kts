@@ -20,10 +20,16 @@ val dl4jVersion: String by project
 dependencies {
     // Neural Network stuff
     implementation("org.deeplearning4j:deeplearning4j-core:$dl4jVersion") {
-        exclude(module = "slf4j.api")
+        exclude(module = "org.slf4j")
+        exclude(module = "slf4j-api")
+        exclude(group = "slf4j")
+        exclude(group = "org.slf4j")
     }
     implementation("org.nd4j:nd4j-native-platform:$dl4jVersion") {
-        exclude(module = "slf4j.api")
+        exclude(module = "org.slf4j")
+        exclude(module = "slf4j-api")
+        exclude(group = "slf4j")
+        exclude(group = "org.slf4j")
     }
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation("org.slf4j:slf4j-api:2.0.13")
